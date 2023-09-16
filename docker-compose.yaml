@@ -9,18 +9,19 @@ services:
 
   # the available ffmpeg package for Jetson Nano will stop recording after about 30 seconds, but freshly-compiled is good
   ffmpeg:
-    image: ${registry}video/ffmpeg
+    image: ${project}ffmpeg${tag}
     build:
       context: ffmpeg
 
   # proxies all configured cameras (csi and outdoor)
   rtspproxy:
-    image: ${registry}video/rtspproxy
+    image: ${project}rtspproxy${tag}
     build:
       context: rtspProxy
       dockerfile: Dockerfile
       args:
-        registry: $registry
+        project: $project
+        tag: $tag
         inferenceImg: $inferenceImg
         mediaMnt: $mediaMnt
         mediamtxVer: $mediamtxVer
@@ -50,11 +51,12 @@ services:
 
   # records from the rtspproxy stream
   outdoor:
-    image: ${registry}video/recorder
+    image: ${project}recorder${tag}
     build:
       context: recorder
       args:
-        registry: $registry
+        project: $project
+        tag: $tag
     depends_on:
       - rtspproxy
     environment:
@@ -71,11 +73,12 @@ services:
 
   # records from the rtspproxy stream
   csi:
-    image: ${registry}video/recorder
+    image: ${project}recorder${tag}
     build:
       context: recorder
       args:
-        registry: $registry
+        project: $project
+        tag: $tag
     depends_on:
       - rtspproxy
     environment:

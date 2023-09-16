@@ -1,8 +1,11 @@
 # the included ffmpeg will stop recording after about 30 seconds, but freshly-compiled is good
-ARG registry
-FROM ${registry}video/ffmpeg as ffmpeg
+ARG project
+ARG tag
+FROM ${project}ffmpeg${tag} as ffmpeg
 
 FROM ubuntu:18.04
+
+RUN apt update && apt upgrade -y --autoremove && apt clean
 
 COPY --from=ffmpeg /usr/local/share/ffmpeg /usr/local/share/
 COPY --from=ffmpeg /usr/local/include/* /usr/local/include/

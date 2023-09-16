@@ -1,7 +1,7 @@
 # the included ffmpeg will stop recording after about 30 seconds, but freshly-compiled is good
 FROM ubuntu:18.04
 
-RUN apt update && apt upgrade -y && apt install -y git
+RUN apt update && apt install -y git
 RUN git clone https://git.ffmpeg.org/ffmpeg.git
 RUN apt install -y make gcc pkg-config yasm
 WORKDIR ffmpeg

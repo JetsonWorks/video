@@ -1,6 +1,7 @@
-ARG registry
+ARG project
+ARG tag
 ARG inferenceImg
-FROM ${registry}video/ffmpeg as ffmpeg
+FROM ${project}ffmpeg${tag} as ffmpeg
 # based on inference image for the nvidia packages
 FROM ${inferenceImg} as inference
 
