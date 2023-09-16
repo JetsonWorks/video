@@ -1,0 +1,10 @@
+.directory
+.idea/
+*.sw*
+*.iml
+*.log
+
+models.json
+**/*.png
+config.db
+media/

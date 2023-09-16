@@ -1,0 +1,92 @@
+# using bind-mounted directories instead of volumes for easier access
+#volumes:
+#  log:
+#  videos:
+
+services:
+
+# ### for the Jetson Nano (arm64) ###
+
+  # the available ffmpeg package for Jetson Nano will stop recording after about 30 seconds, but freshly-compiled is good
+  ffmpeg:
+    image: ${registry}video/ffmpeg
+    build:
+      context: ffmpeg
+
+  # proxies all configured cameras (csi and outdoor)
+  rtspproxy:
+    image: ${registry}video/rtspproxy
+    build:
+      context: rtspProxy
+      dockerfile: Dockerfile
+      args:
+        registry: $registry
+        inferenceImg: $inferenceImg
+        mediaMnt: $mediaMnt
+        mediamtxVer: $mediamtxVer
+    environment:
+      mediaMnt: $mediaMnt
+    volumes:
+      - type: bind
+        source: $mediaDir
+        target: $mediaMnt
+      - type: bind
+        source: /tmp/argus_socket
+        target: /tmp/argus_socket
+      - type: bind
+        source: /etc/enctune.conf
+        target: /etc/enctune.conf
+    ports:
+      - "8554:8554"
+      - "8555:8555"
+      - "8000:8000/udp"
+      - "8001:8001/udp"
+      - "8002:8002/udp"
+      - "8003:8003/udp"
+    devices:
+      - "/dev/video0:/dev/video0"
+      - "/dev/video1:/dev/video1"
+    cpu_count: 2
+
+  # records from the rtspproxy stream
+  outdoor:
+    image: ${registry}video/recorder
+    build:
+      context: recorder
+      args:
+        registry: $registry
+    depends_on:
+      - rtspproxy
+    environment:
+      mediaMnt: $mediaMnt
+      timeFormat: $timeFormat
+      camName: outdoor
+      camUrl: rtsp://rtspproxy:8554/outdoor
+      camMaxVideos: $camMaxVideos
+      videoLength: $videoLength
+    volumes:
+      - type: bind
+        source: $mediaDir
+        target: $mediaMnt
+
+  # records from the rtspproxy stream
+  csi:
+    image: ${registry}video/recorder
+    build:
+      context: recorder
+      args:
+        registry: $registry
+    depends_on:
+      - rtspproxy
+    environment:
+      mediaMnt: $mediaMnt
+      timeFormat: $timeFormat
+      camName: csi
+      camUrl: rtsp://rtspproxy:8554/csi
+      camMaxVideos: $camMaxVideos
+      videoLength: $videoLength
+    volumes:
+      - type: bind
+        source: $mediaDir
+        target: $mediaMnt
+
