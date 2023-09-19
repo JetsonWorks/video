@@ -1,6 +1,6 @@
 
 ###############################################
-# General parameters
+# General settings
 
 # Sets the verbosity of the program; available values are "error", "warn", "info", "debug".
 logLevel: info
@@ -13,10 +13,10 @@ logFile: mediamtx.log
 readTimeout: 10s
 # Timeout of write operations.
 writeTimeout: 10s
-# Number of read buffers.
-# A higher value allows a wider throughput, a lower value allows to save RAM.
-readBufferCount: 512
-# Maximum size of payload of outgoing UDP packets.
+# Size of the queue of outgoing packets.
+# A higher value allows to increase throughput, a lower value allows to save RAM.
+writeQueueSize: 512
+# Maximum size of outgoing UDP packets.
 # This can be decreased to avoid fragmentation on networks with a low UDP MTU.
 udpMaxPayloadSize: 1472
 
@@ -53,19 +53,23 @@ pprof: no
 pprofAddress: 127.0.0.1:9999
 
 # Command to run when a client connects to the server.
-# Prepend ./ to run an executable in the current folder (example: "./ffmpeg")
 # This is terminated with SIGINT when a client disconnects from the server.
 # The following environment variables are available:
 # * RTSP_PORT: RTSP server port
+# * MTX_CONN_TYPE: connection type
+# * MTX_CONN_ID: connection ID
 runOnConnect:
 # Restart the command if it exits.
 runOnConnectRestart: no
+# Command to run when a client disconnects from the server.
+# Environment variables are the same of runOnConnect.
+runOnDisconnect:
 
 ###############################################
-# RTSP parameters
+# RTSP settings
 
-# Disable support for the RTSP protocol.
-rtspDisable: no
+# Allow publishing and reading streams with the RTSP protocol.
+rtsp: yes
 # List of enabled RTSP transport protocols.
 # UDP is the most performant, but doesn't work when there's a NAT/firewall between
 # server and clients, and doesn't support encryption.
@@ -102,10 +106,10 @@ serverCert: server.crt
 authMethods: [basic]
 
 ###############################################
-# RTMP parameters
+# RTMP settings
 
-# Disable support for the RTMP protocol.
-rtmpDisable: no
+# Allow publishing and reading streams with the RTMP protocol.
+rtmp: yes
 # Address of the RTMP listener. This is needed only when encryption is "no" or "optional".
 rtmpAddress: :1935
 # Encrypt connections with TLS (RTMPS).
@@ -122,10 +126,10 @@ rtmpServerKey: server.key
 rtmpServerCert: server.crt
 
 ###############################################
-# HLS parameters
+# HLS settings
 
-# Disable support for the HLS protocol.
-hlsDisable: no
+# Allow reading streams with the HLS protocol.
+hls: yes
 # Address of the HLS listener.
 hlsAddress: :8888
 # Enable TLS/HTTPS on the HLS server.
@@ -178,10 +182,10 @@ hlsTrustedProxies: []
 hlsDirectory: ''
 
 ###############################################
-# WebRTC parameters
+# WebRTC settings
 
-# Disable support for the WebRTC protocol.
-webrtcDisable: no
+# Allow publishing and reading streams with the WebRTC protocol.
+webrtc: yes
 # Address of the WebRTC listener.
 webrtcAddress: :8889
 # Enable TLS/HTTPS on the WebRTC server.
@@ -222,12 +226,42 @@ webrtcICEUDPMuxAddress:
 # Address of a ICE TCP listener in format host:port.
 # If filled, ICE traffic will pass through a single TCP port,
 # allowing the deployment of the server inside a container or behind a NAT.
-# Setting this parameter forces usage of the TCP protocol, which is not
+# Using this setting forces usage of the TCP protocol, which is not
 # optimal for WebRTC.
 webrtcICETCPMuxAddress:
 
 ###############################################
-# Path parameters
+# SRT settings
+
+# Allow publishing and reading streams with the SRT protocol.
+srt: yes
+# Address of the SRT listener.
+srtAddress: :8890
+
+###############################################
+# Recording settings
+
+# Record streams to disk.
+record: no
+# Path of recording segments.
+# Extension is added automatically.
+# Available variables are %path (path name), %Y %m %d %H %M %S %f (time in strftime format)
+recordPath: ./recordings/%path/%Y-%m-%d_%H-%M-%S-%f
+# Format of recorded segments.
+# Currently the only available format is fmp4 (fragmented MP4).
+recordFormat: fmp4
+# fMP4 files are concatenation of small MP4 files (parts), each with this duration.
+# When a system failure occurs, the last part gets lost.
+# Therefore, the part duration is equal to the RPO (recovery point objective).
+recordPartDuration: 100ms
+# Minimum duration of each segment.
+recordSegmentDuration: 1h
+# Delete segments after this timespan.
+# Set to 0 to disable automatic deletion.
+recordDeleteAfter: 24h
+
+###############################################
+# Path settings
 
 # These settings are path-dependent, and the map key is the name of the path.
 # It's possible to use regular expressions by using a tilde as prefix,
@@ -237,22 +271,24 @@ webrtcICETCPMuxAddress:
 # another entry.
 paths:
   all:
+    ###############################################
+    # General path settings
+
     # Source of the stream. This can be:
-    # * publisher -> the stream is published by a RTSP or RTMP client
+    # * publisher -> the stream is provided by a RTSP, RTMP, WebRTC or SRT client
     # * rtsp://existing-url -> the stream is pulled from another RTSP server / camera
     # * rtsps://existing-url -> the stream is pulled from another RTSP server / camera with RTSPS
     # * rtmp://existing-url -> the stream is pulled from another RTMP server / camera
     # * rtmps://existing-url -> the stream is pulled from another RTMP server / camera with RTMPS
-    # * http://existing-url/stream.m3u8 -> the stream is pulled from another HLS server
-    # * https://existing-url/stream.m3u8 -> the stream is pulled from another HLS server with HTTPS
-    # * udp://ip:port -> the stream is pulled from UDP, by listening on the specified IP and port
+    # * http://existing-url/stream.m3u8 -> the stream is pulled from another HLS server / camera
+    # * https://existing-url/stream.m3u8 -> the stream is pulled from another HLS server / camera with HTTPS
+    # * udp://ip:port -> the stream is pulled with UDP, by listening on the specified IP and port
+    # * srt://existing-url -> the stream is pulled from another SRT server / camera
+    # * whep://existing-url -> the stream is pulled from another WebRTC server / camera
+    # * wheps://existing-url -> the stream is pulled from another WebRTC server / camera with HTTPS
     # * redirect -> the stream is provided by another path or server
     # * rpiCamera -> the stream is provided by a Raspberry Pi Camera
     source: publisher
-
-    ###############################################
-    # General path parameters
-
     # If the source is a URL, and the source certificate is self-signed
     # or invalid, you can provide the fingerprint of the certificate in order to
     # validate it anyway. It can be obtained by running:
@@ -268,9 +304,13 @@ paths:
     # If sourceOnDemand is "yes", the source will be closed when there are no
     # readers connected and this amount of time has passed.
     sourceOnDemandCloseAfter: 10s
+    # Maximum number of readers. Zero means no limit.
+    maxReaders: 0
+    # Record streams to disk (if global recording is enabled).
+    record: yes
 
     ###############################################
-    # Authentication path parameters
+    # Authentication path settings
 
     # Username required to publish.
     # SHA256-hashed values can be inserted with the "sha256:" prefix.
@@ -291,16 +331,16 @@ paths:
     readIPs: []
 
     ###############################################
-    # Publisher path parameters (when source is "publisher")
+    # Publisher path settings (when source is "publisher")
 
-    # do not allow another client to disconnect the current publisher and publish in its place.
-    disablePublisherOverride: no
+    # allow another client to disconnect the current publisher and publish in its place.
+    overridePublisher: yes
     # if no one is publishing, redirect readers to this path.
     # It can be can be a relative path  (i.e. /otherstream) or an absolute RTSP URL.
     fallback:
 
     ###############################################
-    # RTSP path parameters (when source is a RTSP or a RTSPS URL)
+    # RTSP path settings (when source is a RTSP or a RTSPS URL)
 
     # protocol used to pull the stream. available values are "automatic", "udp", "multicast", "tcp".
     sourceProtocol: automatic
@@ -320,13 +360,13 @@ paths:
     rtspRangeStart:
 
     ###############################################
-    # Redirect path parameters (when source is "redirect")
+    # Redirect path settings (when source is "redirect")
 
     # RTSP URL which clients will be redirected to.
     sourceRedirect:
 
     ###############################################
-    # Raspberry Pi Camera path parameters (when source is "rpiCamera")
+    # Raspberry Pi Camera path settings (when source is "rpiCamera")
 
     # ID of the camera
     rpiCameraCamID: 0
@@ -408,11 +448,10 @@ paths:
     rpiCameraTextOverlay: '%Y-%m-%d %H:%M:%S - MediaMTX'
 
     ###############################################
-    # external commands path parameters
+    # External commands path settings
 
     # Command to run when this path is initialized.
-    # This can be used to publish a stream and keep it always opened.
-    # Prepend ./ to run an executable in the current folder (example: "./ffmpeg")
+    # This can be used to publish a stream when the server is launched.
     # This is terminated with SIGINT when the program closes.
     # The following environment variables are available:
     # * MTX_PATH: path name
@@ -423,9 +462,8 @@ paths:
     # Restart the command if it exits.
     runOnInitRestart: no
 
-    # Command to run when this path is requested.
+    # Command to run when this path is requested by a reader.
     # This can be used to publish a stream on demand.
-    # Prepend ./ to run an executable in the current folder (example: "./ffmpeg")
     # This is terminated with SIGINT when the path is not requested anymore.
     # The following environment variables are available:
     # * MTX_PATH: path name
@@ -442,30 +480,38 @@ paths:
     # readers connected and this amount of time has passed.
     runOnDemandCloseAfter: 10s
 
-    # Command to run when the stream is ready to be read, whether it is
+    # Command to run when the stream is ready to be read, whenever it is
     # published by a client or pulled from a server / camera.
-    # Prepend ./ to run an executable in the current folder (example: "./ffmpeg")
     # This is terminated with SIGINT when the stream is not ready anymore.
     # The following environment variables are available:
     # * MTX_PATH: path name
+    # * MTX_SOURCE_TYPE: source type
+    # * MTX_SOURCE_ID: source ID
     # * RTSP_PORT: RTSP server port
     # * G1, G2, ...: regular expression groups, if path name is
     #   a regular expression.
     runOnReady:
     # Restart the command if it exits.
     runOnReadyRestart: no
+    # Command to run when the stream is not available anymore.
+    # Environment variables are the same of runOnReady.
+    runOnNotReady:
 
-    # Command to run when a clients starts reading.
-    # Prepend ./ to run an executable in the current folder (example: "./ffmpeg")
+    # Command to run when a client starts reading.
     # This is terminated with SIGINT when a client stops reading.
     # The following environment variables are available:
     # * MTX_PATH: path name
+    # * MTX_READER_TYPE: reader type
+    # * MTX_READER_ID: reader ID
     # * RTSP_PORT: RTSP server port
     # * G1, G2, ...: regular expression groups, if path name is
     #   a regular expression.
     runOnRead:
     # Restart the command if it exits.
     runOnReadRestart: no
+    # Command to run when a client stops reading.
+    # Environment variables are the same of runOnRead.
+    runOnUnread:
 
 # paths for Jetson (for reference) - will vary based on your device capabilities
   outdoor:
