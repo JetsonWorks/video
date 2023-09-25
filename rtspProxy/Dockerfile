@@ -3,7 +3,7 @@ ARG tag
 ARG inferenceImg
 FROM ${project}ffmpeg${tag} as ffmpeg
 # based on inference image for the nvidia packages
-FROM ${inferenceImg} as inference
+FROM ${inferenceImg}
 
 RUN apt update && apt upgrade -y --autoremove && apt install -y gstreamer1.0-tools gstreamer1.0-rtsp curl && apt clean
 
