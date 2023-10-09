@@ -63,7 +63,7 @@ services:
       mediaMnt: $mediaMnt
       timeFormat: $timeFormat
       camName: outdoor
-      camUrl: rtsp://rtspproxy:8554/outdoor
+      camUrl: rtsp://rtspproxy:8554/$camName
       camMaxVideos: $camMaxVideos
       videoLength: $videoLength
     volumes:
@@ -85,7 +85,7 @@ services:
       mediaMnt: $mediaMnt
       timeFormat: $timeFormat
       camName: csi
-      camUrl: rtsp://rtspproxy:8554/csi
+      camUrl: rtsp://rtspproxy:8554/$camName
       camMaxVideos: $camMaxVideos
       videoLength: $videoLength
     volumes:
