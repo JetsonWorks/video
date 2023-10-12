@@ -514,14 +514,47 @@ paths:
     runOnUnread:
 
 # paths for Jetson (for reference) - will vary based on your device capabilities
-  outdoor:
-    # runOnInit: gst-launch-1.0 v4l2src device=/dev/video1 ! 'image/jpeg,width=1920,height=1080,framerate=30/1' ! rtspclientsink location=rtsp://rtspproxy:8554/outdoor
-    # runOnInit: gst-launch-1.0 -e v4l2src device=/dev/video1 ! 'video/x-raw,format=YUY2,width=800,height=600,framerate=20/1' ! nvvidconv ! nvv4l2h265enc ! rtspclientsink location=rtsp://rtspproxy:8554/outdoor
-    # runOnInit: gst-launch-1.0 -e v4l2src device=/dev/video1 ! 'video/x-raw,format=YUY2,width=1280,height=720,framerate=9/1' ! nvvidconv ! nvv4l2h265enc ! rtspclientsink location=rtsp://rtspproxy:8554/outdoor
-    runOnInit: gst-launch-1.0 -e v4l2src device=/dev/video1 ! 'image/jpeg,width=1920,height=1080,framerate=30/1' ! jpegdec ! nvvidconv ! nvv4l2h265enc ! rtspclientsink location=rtsp://rtspproxy:8554/outdoor
-    runOnInitRestart: yes
 
-  csi:
-    runOnInit: gst-launch-1.0 -e nvarguscamerasrc ! 'video/x-raw(memory:NVMM),format=NV12,width=1920,height=1080' ! omxh265enc ! rtspclientsink location=rtsp://rtspproxy:8554/csi
-    runOnInitRestart: yes
+# capture
+
+#  C615:
+#    runOnInit: gst-launch-1.0 v4l2src device=/dev/video0 ! 'image/jpeg,width=1920,height=1080' ! rtspclientsink location=rtsp://rtspproxy:8554/C615
+#    runOnInitRestart: yes
+
+#  outdoor:
+#    # runOnInit: gst-launch-1.0 v4l2src device=/dev/video1 ! 'image/jpeg,width=1920,height=1080,framerate=30/1' ! rtspclientsink location=rtsp://rtspproxy:8554/outdoor
+#    # runOnInit: gst-launch-1.0 -e v4l2src device=/dev/video1 ! 'video/x-raw,format=YUY2,width=800,height=600,framerate=20/1' ! nvvidconv ! nvv4l2h265enc ! rtspclientsink location=rtsp://rtspproxy:8554/outdoor
+#    # runOnInit: gst-launch-1.0 -e v4l2src device=/dev/video1 ! 'video/x-raw,format=YUY2,width=1280,height=720,framerate=9/1' ! nvvidconv ! nvv4l2h265enc ! rtspclientsink location=rtsp://rtspproxy:8554/outdoor
+#    runOnInit: gst-launch-1.0 -e v4l2src device=/dev/video1 ! 'image/jpeg,width=1920,height=1080,framerate=30/1' ! jpegdec ! nvvidconv ! nvv4l2h265enc ! rtspclientsink location=rtsp://rtspproxy:8554/outdoor
+#    runOnInitRestart: yes
+
+#  csi:
+#    runOnInit: gst-launch-1.0 -e nvarguscamerasrc ! 'video/x-raw(memory:NVMM),format=NV12,width=1920,height=1080' ! omxh265enc ! rtspclientsink location=rtsp://rtspproxy:8554/csi
+#    runOnInitRestart: yes
+
+# proxy streams from DefKoi
+
+#  liveC615:
+#    source: rtsp://rtspproxy:8554/live/HDWebcamC615
+#    sourceOnDemand: yes
+
+#  objectC615:
+#    source: rtsp://rtspproxy:8554/object/HDWebcamC615
+#    sourceOnDemand: yes
+
+#  liveHDUSB:
+#    source: rtsp://rtspproxy:8554/live/HDUSBCamera
+#    sourceOnDemand: yes
+
+#  objectHDUSB:
+#    source: rtsp://rtspproxy:8554/object/HDUSBCamera
+#    sourceOnDemand: yes
+
+#  liveNVArgus0:
+#    source: rtsp://rtspproxy:8554/live/NVArgus0
+#    sourceOnDemand: yes
+
+#  objectNVArgus0:
+#    source: rtsp://rtspproxy:8554/object/NVArgus0
+#    sourceOnDemand: yes
 
