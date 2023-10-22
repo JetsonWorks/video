@@ -532,29 +532,3 @@ paths:
 #    runOnInit: gst-launch-1.0 -e nvarguscamerasrc ! 'video/x-raw(memory:NVMM),format=NV12,width=1920,height=1080' ! omxh265enc ! rtspclientsink location=rtsp://rtspproxy:8554/csi
 #    runOnInitRestart: yes
 
-# proxy streams from DefKoi
-
-#  liveC615:
-#    source: rtsp://rtspproxy:8554/live/HDWebcamC615
-#    sourceOnDemand: yes
-
-#  objectC615:
-#    source: rtsp://rtspproxy:8554/object/HDWebcamC615
-#    sourceOnDemand: yes
-
-#  liveHDUSB:
-#    source: rtsp://rtspproxy:8554/live/HDUSBCamera
-#    sourceOnDemand: yes
-
-#  objectHDUSB:
-#    source: rtsp://rtspproxy:8554/object/HDUSBCamera
-#    sourceOnDemand: yes
-
-#  liveNVArgus0:
-#    source: rtsp://rtspproxy:8554/live/NVArgus0
-#    sourceOnDemand: yes
-
-#  objectNVArgus0:
-#    source: rtsp://rtspproxy:8554/object/NVArgus0
-#    sourceOnDemand: yes
-

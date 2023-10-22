@@ -13,11 +13,11 @@ services:
     build:
       context: ffmpeg
 
-  # proxies all configured cameras (csi and outdoor)
-  rtspproxy:
-    image: ${project}rtspproxy${tag}
+  # proxies all configured cameras
+  streamer:
+    image: ${project}streamer${tag}
     build:
-      context: rtspProxy
+      context: streamer
       dockerfile: Dockerfile
       args:
         project: $project
@@ -49,7 +49,7 @@ services:
       - "/dev/video1:/dev/video1"
     cpu_count: 2
 
-  # records from the rtspproxy stream
+  # records from the stream
   outdoor:
     image: ${project}recorder${tag}
     build:
@@ -58,12 +58,12 @@ services:
         project: $project
         tag: $tag
     depends_on:
-      - rtspproxy
+      - streamer
     environment:
       mediaMnt: $mediaMnt
       timeFormat: $timeFormat
       camName: outdoor
-      camUrl: rtsp://rtspproxy:8554/outdoor
+      camUrl: rtsp://streamer:8554/outdoor
       camMaxVideos: $camMaxVideos
       videoLength: $videoLength
     volumes:
@@ -71,7 +71,7 @@ services:
         source: $mediaDir
         target: $mediaMnt
 
-  # records from the rtspproxy stream
+  # records from the stream
   csi:
     image: ${project}recorder${tag}
     build:
@@ -80,12 +80,12 @@ services:
         project: $project
         tag: $tag
     depends_on:
-      - rtspproxy
+      - streamer
     environment:
       mediaMnt: $mediaMnt
       timeFormat: $timeFormat
       camName: csi
-      camUrl: rtsp://rtspproxy:8554/csi
+      camUrl: rtsp://streamer:8554/csi
       camMaxVideos: $camMaxVideos
       videoLength: $videoLength
     volumes:

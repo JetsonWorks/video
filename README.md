@@ -38,7 +38,7 @@ The proxy uses a bind-mounted directory for configuration.
 While running, you may update mediamtx.yml, and mediamtx will hot-reload the configuration once you save your changes.
 By default, this directory is /var/media on the host and /media in the container.
 
-The default sample configuration will be installed as /var/media/mediamtx.yml when the rtspproxy service starts.
+The default sample configuration will be installed as /var/media/mediamtx.yml when the streamer service starts.
 See [MediaMTX](https://github.com/bluenviron/mediamtx),
 [gst-launch-1.0](https://gstreamer.freedesktop.org/documentation/tools/gst-launch.html?gi-language=c),
 and other guides for help configuring paths in mediamtx.yml.
@@ -48,7 +48,7 @@ and other guides for help configuring paths in mediamtx.yml.
 1. Start the media server
 
 ```sh
-docker compose up rtspproxy
+docker compose up streamer
 ```
 
 ## Viewing
